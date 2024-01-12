@@ -8,9 +8,14 @@ set -eu -o pipefail
 
 ### Main script entry point
 
-DEVOPS_REPO="https://github.com/os-climate/devops-toolkit.git"
+GIT_CMD=$(which git)
+if [ ! -x "$GIT_CMD" ]; then
+    echo "GIT command was not found in PATH"; exit 1
+fi
+
+# DEVOPS_REPO="https://github.com/os-climate/devops-toolkit.git"
 REPO_DIR=$(git rev-parse --show-toplevel)
-REPO_NAME=$(basename "$REPO_DIR")
+# REPO_NAME=$(basename "$REPO_DIR")
 
 echo "Cloning DevOps repository into /tmp"
 DEVOPS_DIR=$(mktemp -d -t devops-XXXXXXXX)
@@ -28,8 +33,7 @@ fi
 echo "Extracting shell code from bootstrap.yaml file..."
 
 EXTRACT="false"
-while read -r LINE
-do
+while read -r LINE; do
     if [ "$LINE" = "### SHELL CODE START ###" ]; then
         EXTRACT="true"
         SHELL_SCRIPT=$(mktemp -t script-XXXXXXXX.sh)
@@ -47,14 +51,16 @@ do
     fi
 done < "$DEVOPS_DIR"/.github/workflows/bootstrap.yaml
 
+echo "Running extracted shell script code"
+"$SHELL_SCRIPT"
 
 ### Tidy up afterwards
 
 echo "Cleaning up..."
-if [ -d "$DEVOPS_DIR" ] && [ ! -z "$DEVOPS_DIR" ]; then
+if [ -d "$DEVOPS_DIR" ] && [ -n "$DEVOPS_DIR" ]; then
     rm -Rf "$DEVOPS_DIR"
 fi
 if [ -f "$SHELL_SCRIPT" ]; then
     echo "Deleting shell script code: $SHELL_SCRIPT"
-    # rm "$SHELL_SCRIPT"
+    rm "$SHELL_SCRIPT"
 fi
