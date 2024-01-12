@@ -1,85 +1,60 @@
 #!/bin/bash
 
 # set -x
+set -eu -o pipefail
 
 ### Shared functions
 
-# Renames files/folders containing template name
-rename_object() {
-    if [ $# -ne 1 ]; then
-        echo "Function requires an argumeent: rename_object [filesystem object]"; exit 1
-    else
-        FS_OBJECT="$1"
-    fi
-    # Function take a filesystem object as a single argument
-    FS_OBJECT="$1"
-    OBJECT_PATH=$(dirname "$FS_OBJECT")
-    OBJECT_NAME=$(basename "$FS_OBJECT")
-
-    # Check if filesystem object contains template name
-    if [[ ! "$OBJECT_NAME" == *"$TEMPLATE_NAME"* ]]; then
-        # Nothing to do; abort early
-        return
-    fi
-
-    NEW_NAME="${OBJECT_NAME//$TEMPLATE_NAME/$REPO_NAME}"git
-    if [ -d "$FS_OBJECT" ]; then
-        echo "Renaming folder:"
-    elif  [ -f "$FS_OBJECT" ]; then
-        echo "Renaming file:"
-    elif [ -L "$FS_OBJECT" ]; then
-        echo "Renaming symlink:"
-    fi
-    git mv "$OBJECT_PATH/$OBJECT_NAME" "$OBJECT_PATH/$NEW_NAME"
-}
-
-# Checks file content for template name and replaces matching strings
-file_content_substitution() {
-    if [ $# -ne 1 ]; then
-        echo "Function requires an argumeent: file_content_substitution [filename]"; exit 1
-    else
-        FILENAME="$1"
-    fi
-    if (grep "$TEMPLATE_NAME" "$FILENAME" > /dev/null 2>&1); then
-        MATCHES=$(grep -c "$TEMPLATE_NAME" "$FILENAME")
-        if [ "$MATCHES" -eq 1 ]; then
-            echo "1 content substitution required: $FILENAME"
-        else
-            echo "$MATCHES content substitutions required: $FILENAME"
-        fi
-    fi
-    sed -i "s/$TEMPLATE_NAME/$REPO_NAME/g" "$FILENAME"
-}
 
 ### Main script entry point
 
-TEMPLATE_NAME=osc-python-template
-if ! (git rev-parse --show-toplevel > /dev/null); then
-    echo "Error: this folder is not part of a GIT repository"; exit 1
-fi
-
+DEVOPS_REPO="https://github.com/os-climate/devops-toolkit.git"
 REPO_DIR=$(git rev-parse --show-toplevel)
 REPO_NAME=$(basename "$REPO_DIR")
 
-if [ "$TEMPLATE_NAME" == "$REPO_NAME" ]; then
-    echo "Template name matches repository name"; exit 1
-else
-    echo "Template name: $TEMPLATE_NAME"
-    echo "Repository name: $REPO_NAME"
-fi
+echo "Cloning DevOps repository into /tmp"
+DEVOPS_DIR=$(mktemp -d -t devops-XXXXXXXX)
+git clone https://github.com/os-climate/devops-toolkit.git "$DEVOPS_DIR"
 
 # Change to top-level of GIT repository
 CURRENT_DIR=$(pwd)
 if [ "$REPO_DIR" != "$CURRENT_DIR" ]; then
     echo "Changing directory to: $REPO_DIR"
-    cd "$REPO_DIR" || echo "Cound not change directory!"; exit 1
+    if ! (cd "$REPO_DIR"); then
+        echo "Error: unable to change directory"; exit 1
+    fi
 fi
 
-echo "Performing renaming/substitution operations on repository"
+echo "Extracting shell code from bootstrap.yaml file..."
 
-for FS_OBJECT in $(find -- * | xargs -0); do
-    rename_object "$FS_OBJECT"
-    if [ -f "$FS_OBJECT" ]; then
-        file_content_substitution "$FS_OBJECT"
+EXTRACT="false"
+while read -r LINE
+do
+    if [ "$LINE" = "### SHELL CODE START ###" ]; then
+        EXTRACT="true"
+        SHELL_SCRIPT=$(mktemp -t script-XXXXXXXX.sh)
+        touch "$SHELL_SCRIPT"
+        chmod a+x "$SHELL_SCRIPT"
+        echo "Creating shell script: $SHELL_SCRIPT"
+        echo "#!/bin/sh" > "$SHELL_SCRIPT"
     fi
-done
+    if [ "$EXTRACT" = "true" ]; then
+        echo "$LINE" >> "$SHELL_SCRIPT"
+        if [ "$LINE" = "### SHELL CODE END ###" ]; then
+            echo "Successfully extracted shell script from bootstrap.yaml"
+            break
+        fi
+    fi
+done < "$DEVOPS_DIR"/.github/workflows/bootstrap.yaml
+
+
+### Tidy up afterwards
+
+echo "Cleaning up..."
+if [ -d "$DEVOPS_DIR" ] && [ ! -z "$DEVOPS_DIR" ]; then
+    rm -Rf "$DEVOPS_DIR"
+fi
+if [ -f "$SHELL_SCRIPT" ]; then
+    echo "Deleting shell script code: $SHELL_SCRIPT"
+    # rm "$SHELL_SCRIPT"
+fi
