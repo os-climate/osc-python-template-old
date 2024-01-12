@@ -42,7 +42,7 @@ build-backend = "pdm.backend"
 license-files = ["LICENSES.txt"]
 
 [project.scripts]
-osc-data-extractor = "osc_data_extractor.skeleton:run"
+osc-data-extractor = "osc-python-template.skeleton:run"
 
 [project.optional-dependencies]
   dev = [

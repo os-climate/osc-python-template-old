@@ -29,11 +29,11 @@
 
 
 
-==================
-osc-data-extractor
-==================
+===================
+osc-python-template
+===================
 
-OS-Climate Data Extraction Tool
+Template repository for the OS-Climate Python projects
 
 .. _notes:
 
