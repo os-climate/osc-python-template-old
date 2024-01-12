@@ -1,9 +1,9 @@
 [project]
-name = "osc-data-extractor"
+name = "osc-python-template"
 version = "0.1.0"
-description = "OS-Climate Data Extraction Tool"
+description = "OS-Climate Python Template Repository"
 authors = [
-    {name = "David Besslich",email = "mwatkins@linuxfoundation.org"},
+    {name = "Doctor Jeep",email = "sisters-of-mercy@os-climate.org"},
 ]
 requires-python = ">=3.9"
 readme = "README.rst"
@@ -27,12 +27,12 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/os-climate/osc-data-extraction"
-Repository = "https://github.com/os-climate/osc-data-extraction"
-Downloads = "https://github.com/os-climate/osc-data-extraction/releases"
-"Bug Tracker" = "https://github.com/os-climate/osc-data-extraction/issues"
-Documentation = "https://github.com/os-climate/osc-data-extraction/tree/main/docs"
-"Source Code" = "https://github.com/os-climate/osc-data-extraction"
+Homepage = "https://github.com/os-climate/osc-python-template"
+Repository = "https://github.com/os-climate/osc-python-template"
+Downloads = "https://github.com/os-climate/osc-python-template/releases"
+"Bug Tracker" = "https://github.com/os-climate/osc-python-template/issues"
+Documentation = "https://github.com/os-climate/osc-python-template/tree/main/docs"
+"Source Code" = "https://github.com/os-climate/osc-python-template"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -42,7 +42,7 @@ build-backend = "pdm.backend"
 license-files = ["LICENSES.txt"]
 
 [project.scripts]
-osc-data-extractor = "osc-python-template.skeleton:run"
+osc-python-template = "osc-python-template.skeleton:run"
 
 [project.optional-dependencies]
   dev = [
