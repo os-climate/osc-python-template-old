@@ -3,9 +3,6 @@
 # set -x
 set -eu -o pipefail
 
-### Shared functions
-
-
 ### Main script entry point
 
 DEVOPS_REPO="git@github.com:os-climate/devops-toolkit.git"
@@ -52,8 +49,7 @@ while read -r LINE; do
 done < "$DEVOPS_DIR"/.github/workflows/bootstrap.yaml
 
 echo "Running extracted shell script code"
-set +eu +o pipefail
-set -x
+# set +eu +o pipefail
 "$SHELL_SCRIPT"
 
 ### Tidy up afterwards
@@ -62,14 +58,8 @@ if [ -d "$DEVOPS_DIR" ] && [ -n "$DEVOPS_DIR" ]; then
     rm -Rf "$DEVOPS_DIR"
 fi
 if [ -f "$SHELL_SCRIPT" ]; then
-    echo "Shell code temporarily left in place during testing"
-    # echo "Deleting shell script code: $SHELL_SCRIPT"
-    # rm "$SHELL_SCRIPT"
+    echo "Deleting temporary shell script code: $SHELL_SCRIPT"
+    rm "$SHELL_SCRIPT"
 fi
 # Remove branch, if it exists: update-devops-tooling
-if (git rev-parse --verify update-devops-tooling > /dev/null); then
-    git branch -d update-devops-tooling
-elif (git ls-remote origin update-devops-tooling); then
-    echo "Removing remote branch: update-devops-tooling"
-    git push origin --delete update-devops-tooling
-fi
+git checkout main; git branch -d update-devops-tooling
