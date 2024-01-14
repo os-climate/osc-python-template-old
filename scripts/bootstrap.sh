@@ -66,3 +66,10 @@ if [ -f "$SHELL_SCRIPT" ]; then
     # echo "Deleting shell script code: $SHELL_SCRIPT"
     # rm "$SHELL_SCRIPT"
 fi
+# Remove branch, if it exists: update-devops-tooling
+if (git rev-parse --verify update-devops-tooling > /dev/null); then
+    git branch -d update-devops-tooling
+elif (git ls-remote origin update-devops-tooling); then
+    echo "Removing remote branch: update-devops-tooling"
+    git push origin --delete update-devops-tooling
+fi
