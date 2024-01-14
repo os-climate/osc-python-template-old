@@ -8,14 +8,14 @@ set -eu -o pipefail
 
 ### Main script entry point
 
+DEVOPS_REPO="git@github.com:os-climate/devops-toolkit.git"
+
 GIT_CMD=$(which git)
 if [ ! -x "$GIT_CMD" ]; then
     echo "GIT command was not found in PATH"; exit 1
 fi
 
-DEVOPS_REPO="git@github.com:os-climate/devops-toolkit.git"
 REPO_DIR=$(git rev-parse --show-toplevel)
-
 # Change to top-level of GIT repository
 CURRENT_DIR=$(pwd)
 if [ "$REPO_DIR" != "$CURRENT_DIR" ]; then
@@ -53,6 +53,7 @@ done < "$DEVOPS_DIR"/.github/workflows/bootstrap.yaml
 
 echo "Running extracted shell script code"
 set +eu +o pipefail
+set -x
 "$SHELL_SCRIPT"
 
 ### Tidy up afterwards
@@ -62,6 +63,7 @@ if [ -d "$DEVOPS_DIR" ] && [ -n "$DEVOPS_DIR" ]; then
     rm -Rf "$DEVOPS_DIR"
 fi
 if [ -f "$SHELL_SCRIPT" ]; then
-    echo "Deleting shell script code: $SHELL_SCRIPT"
-    rm "$SHELL_SCRIPT"
+    echo "Shell code temporarily left in place during testing"
+    # echo "Deleting shell script code: $SHELL_SCRIPT"
+    # rm "$SHELL_SCRIPT"
 fi
