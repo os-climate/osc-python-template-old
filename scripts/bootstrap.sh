@@ -51,17 +51,16 @@ while read -r LINE; do
     fi
 done < "$DEVOPS_DIR"/.github/workflows/bootstrap.yaml
 
-echo "Removing interim/temporary repository..."
-if [ -d "$DEVOPS_DIR" ] && [ -n "$DEVOPS_DIR" ]; then
-    rm -Rf "$DEVOPS_DIR"
-fi
-
 echo "Running extracted shell script code"
 set +eu +o pipefail
 set -x
 "$SHELL_SCRIPT"
 
 ### Tidy up afterwards
+echo "Removing interim/temporary repository..."
+if [ -d "$DEVOPS_DIR" ] && [ -n "$DEVOPS_DIR" ]; then
+    rm -Rf "$DEVOPS_DIR"
+fi
 if [ -f "$SHELL_SCRIPT" ]; then
     echo "Shell code temporarily left in place during testing"
     # echo "Deleting shell script code: $SHELL_SCRIPT"
