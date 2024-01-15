@@ -1,8 +1,8 @@
 ==================
-osc-data-extractor
+osc-python-template
 ==================
 
-This is the documentation of **osc-data-extractor**.
+This is the documentation of **osc-python-template**.
 
 .. note::
 
